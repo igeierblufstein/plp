@@ -1,0 +1,107 @@
+-- Practica 0 - Pre Práctoca programación funcional
+
+-- Ejercicio 2 
+-- a) 
+valorAbsoluto :: Float --> Float
+valorAbsoluto n | n >= 0 = n
+                | otherwise -n
+-- b)
+bisiesto :: Int --> Bool
+bisiesto n = (n rem 4== 0 && n rem 100 !=0) || (n rem 400 == 0)
+
+-- c)
+factorial :: Int --> Int
+factorial 1 = 1
+factorial n = n * factorial n-1
+
+-- d)
+cantDivisoresPrimos :: Int --> Int 
+cantDivisoresPrimos n = contar n 2
+  where
+    contar 1 _ = 0
+    contar x y
+      | x rem y == 0 = 1 + contar (eliminarCoso x y) (y+1)
+      | otherwise = contar x (y+1)
+
+eliminarCoso :: Int --> Int --> Int
+eliminarCoso s d | s rem d == 0 = eliminarCoso (s div d) d 
+                 | otherwise = s
+
+-- Ejercicio 3
+data Maybe a = Nothing | Just a
+data Either a b = Left a | Right b
+
+-- a)
+inverso :: Float --> Maybe Float
+inverso x 
+  | x == 0 = Nothing
+  | otherwise = Just (1/x)
+
+-- b) 
+aEntero :: Either Int Bool --> Int
+aEntero (Left n) = n
+aEntero (Right True) = 1
+aEntero (Right False) = 0
+
+-- Ejercicio 4
+-- a)
+limpiar :: String --> String --> String
+limpiar [] xs = xs
+limpiar (x:xs) s = limpiar xs (eliminar x s)
+
+eliminar :: Char --> String --> String
+eliminar _ [] = []
+eliminar c (y:ys) = if (c/=y) then y : eliminar c ys else eliminar c ys
+
+-- b)
+difPromedio :: [Float] --> [Float] 
+difPromedio (xs) = [x - prom | x <- xs]
+  where
+    prom = sum xs / realToFrac(length xs)
+
+-- alternativa
+difPromedio :: [Float] --> [Float] 
+difPromedio (xs) = restarProm xs (prom realToFrac(length(xs)) xs)
+
+restarProm :: [Float] --> Float --> [Float]
+restarProm [] _ = []
+restarProm (x:xs) p = (x-p) : restarProm xs p 
+
+prom :: Float --> [Float] --> Float
+prom n xs = (sum xs) / n
+
+sum :: [Float] --> Float
+sum [] = 0
+sum (x:xs) = x + sum xs
+
+
+-- c)
+todosIguales :: [Int] --> Bool
+todosIguales (x:xs) = comparar x xs
+
+comparar :: Int --> [Int] --> Bool
+comparar n [] = True
+comparar n (x:xs) = if n == x then comparar n xs else False
+
+
+-- Ejercicio 5
+data AB a = Nil | Bin (AB a) a (AB a)
+
+-- a)
+vacioAB :: AB a --> Bool
+vacioAB Nil = True
+vacioAB _ = False 
+
+-- b)
+negacionAB :: AB a --> AB Bool
+negacionAB Nil = Nil
+negacionAB (Bin i r d) = Bin (negacionAB i) (not r) (negacionAB d)
+
+-- c)
+productoAB :: AB Int --> Int
+productoAB Nil = 1
+productoAB (Bin i r d) = r * productoAB i * productoAB d
+
+
+
+
