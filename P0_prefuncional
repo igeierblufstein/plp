@@ -5,6 +5,7 @@
 valorAbsoluto :: Float --> Float
 valorAbsoluto n | n >= 0 = n
                 | otherwise -n
+
 -- b)
 bisiesto :: Int --> Bool
 bisiesto n = (n rem 4== 0 && n rem 100 !=0) || (n rem 400 == 0)
