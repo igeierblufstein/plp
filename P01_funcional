@@ -13,5 +13,36 @@ flipAll :: [(a --> b --> c)] --> [b --> a --> c]
 flipRaro :: [a -> b -> c] --> 
 
 II)
+max2 :: Ord a => a -> a -> a
+max2 x y | x >= y = x
+         | otherwise = y
+
+normaVectorialC :: Floating a => a -> a -> a
+normaVectorialC x y = sqrt (x^2 + y^2)
+
+-- Ejercicio 2
+curry :: ((a, b) -> c ) -> a -> b -> c 
+curry f x y = f (x, y)
+
+uncurry :: (a -> b -> c) -> ((a, b) -> c )
+uncurry f (x, y) = x y
+
+-- Ejercicio 3
+-- Considerar:
+listaDesde x = x : (listaDesde (x+1))
+esMultiploDe10 n = mod n 10 == 0
+takeHastaMultiploDe10 [] = []
+takeHastaMultiploDe10 (x:xs) = if esMultiploDe10 x then [] else x : (takeHastaMultiploDe10 xs)
+
+takeHastaMultiploDe10 (listaDesde 29)
+takeHastaMultiploDe10 (29 : listaDesde 30)
+29 : takeHastaMultiploDe10 (listaDesde 30)
+29 : takeHastaMultiploDe10 (30 : listaDesde 31)
+29 
+
+-- GENERACIÓN INFINITA
+-- Ejercicio 4
+paresDeNat :: [(Int,Int)]
+
 
 
