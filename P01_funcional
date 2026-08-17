@@ -10,7 +10,7 @@ predecesor :: Float --> Float
 evalucarEnCero :: (a--> b) --> a --> b
 dosVeces :: (a, a) --> a --> a
 flipAll :: [(a --> b --> c)] --> [b --> a --> c]
-flipRaro ::
+flipRaro :: [a -> b -> c] --> 
 
 II)
 
