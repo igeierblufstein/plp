@@ -3,14 +3,14 @@
 -- CURRIFICACIÓN Y TIPOS
 -- Ejercicio 1 
 I) 
-max2 :: Ord a => (a,a) --> a
-normaVectorial :: floating a => (a,a) --> a
-subtract :: Float --> Float --> Float
-predecesor :: Float --> Float
-evalucarEnCero :: (a--> b) --> a --> b
-dosVeces :: (a, a) --> a --> a
-flipAll :: [(a --> b --> c)] --> [b --> a --> c]
-flipRaro :: [a -> b -> c] --> 
+max2 :: Ord a => (a,a) -> a
+normaVectorial :: floating a => (a,a) -> a
+subtract :: Float -> Float -> Float
+predecesor :: Float -> Float
+evalucarEnCero :: (a -> b) -> a -> b
+dosVeces :: (a, a) -> a -> a
+flipAll :: [(a -> b -> c)] -> [b -> a -> c]
+flipRaro :: b -> (a -> b -> c) -> a -> c
 
 II)
 max2 :: Ord a => a -> a -> a
@@ -19,6 +19,8 @@ max2 x y | x >= y = x
 
 normaVectorialC :: Floating a => a -> a -> a
 normaVectorialC x y = sqrt (x^2 + y^2)
+
+III) No
 
 -- Ejercicio 2
 curry :: ((a, b) -> c ) -> a -> b -> c 
@@ -43,6 +45,36 @@ takeHastaMultiploDe10 (29 : listaDesde 30)
 -- GENERACIÓN INFINITA
 -- Ejercicio 4
 paresDeNat :: [(Int,Int)]
+paresDeNat = [(x, s-x) | s <- [0..] , x <- [0..s] ]
+-- truco: Necesitás una sola variable infinita que "controle" el avance (s). 
+         -- La clásica es recorrer por diagonales, usando la suma s = a+b
 
+-- Ejercicio 5
+pitagóricas :: [(Integer, Integer, Integer)]
+pitagóricas = [(a, b, c) | a <- [1..], b <-[1..], c <- [1..], a^2 + b^2 == c^2]
+-- Esto viola la ley 1: hay tres generadores infinitos. 
+-- Como las listas se recorren de "adentro hacia afuera" (el generador de más a la derecha es el que más rápido varía), 
+-- Haskell hace: fija a=1, fija b=1, y después intenta variar c en [1..] infinitamente buscando que 1+1==c^2. 
+-- Como nunca se cumple, ¡el programa se cuelga ahí mismo, sin siquiera llegar a probar b=2!
+-- corregida:
+pitagoricas :: [(Int, Int, Int)]
+pitagoricas = [(a,b,c) | c <-[1..], b <- [1..c], a <- [1..b],] a^2 + b^2 = c^2]
 
+-- Ejercicio 6
+Escribir la función listasQueSuman :: Int -> [[Int]] que, dado un número natural n, devuelve todas las
+listas de enteros positivos (es decir, mayores o iguales que 1) cuya suma sea n. Para este ejercicio se permite
+usar recursión explícita. Pensar por qué la recursón utilizada no es estructural. (Este ejercicio no es de
+generación infinita, pero puede ser útil para otras funciones que generen listas infinitas de listas).
+
+listasQueSuman :: Int -> [[Int]]
+listasQueSuman 0 = [[]]
+listasQueSuman n = [ x : xs | x <- [0..n], xs <- listasQueSuman (n-x) ]
+listasQueSuman desde n=0 hasta x apendado a todas las listasQueSuman x-n
+
+-- Ejercicio 7
+listasFinitasDeEnteros :: [[Int]]
+listasFinitasDeEnteros = [ xs  | x <- [1..], xs <- listasQueSuman x ]
+
+Definir en Haskell una lista que contenga todas las listas finitas de enteros positivos (esto es, con elementos
+mayores o iguales que 1).
 
