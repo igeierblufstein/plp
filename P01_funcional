@@ -78,3 +78,24 @@ listasFinitasDeEnteros = [ xs  | x <- [1..], xs <- listasQueSuman x ]
 Definir en Haskell una lista que contenga todas las listas finitas de enteros positivos (esto es, con elementos
 mayores o iguales que 1).
 
+-- ESQUEMAS DE RECURSIÓN
+-- Ejercicio 1
+Definir utilizando map y filter:
+a) Una función que dada una lista de palabras devuelve una lista con aquellas que tienen menos de 5 letras.
+palabrasMenosDeCinco :: [[Char]] -> [[Char]]
+palabrasMenosDeCinco = filter menorCinco
+         where
+         menorCinco xs = length xs < 5
+
+b) Una función que dada una lista de notas devuelve una lista de booleanos que indiquen si la nota está
+aprobada (es mayor a 6).
+listaNotasAprobadas :: [Int] -> [Bool]
+listaNotasAprobadas = map (\x -> x > 6)
+
+c) Una función que dada una lista de números devuelve una lista que contiene solo los números pares
+elevados al cuadrado.
+paresAlCuadrado :: [Int] -> [Int]
+paresAlCuadrado xs = map (\y -> y*y ) (filter even xs)
+-- paresAlCuadrado = map (\y -> y*y) . filter even xs
+-- . hace que la salida de la segunda sea la entrada de la primera
+
