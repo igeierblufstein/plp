@@ -79,7 +79,7 @@ Definir en Haskell una lista que contenga todas las listas finitas de enteros po
 mayores o iguales que 1).
 
 -- ESQUEMAS DE RECURSIÓN
--- Ejercicio 1
+-- Ejercicio 8 I)
 Definir utilizando map y filter:
 a) Una función que dada una lista de palabras devuelve una lista con aquellas que tienen menos de 5 letras.
 palabrasMenosDeCinco :: [[Char]] -> [[Char]]
@@ -98,4 +98,42 @@ paresAlCuadrado :: [Int] -> [Int]
 paresAlCuadrado xs = map (\y -> y*y ) (filter even xs)
 -- paresAlCuadrado = map (\y -> y*y) . filter even xs
 -- . hace que la salida de la segunda sea la entrada de la primera
+
+-- II)
+-- Redefinir usando foldr las funciones sum, elem, (++), filter y map.
+sum :: [Int] -> Int
+sum = foldr (+) 0
+
+elem :: Eq a => a -> [a] -> Bool
+elem y = foldr (\y acc -> y==acc || acc ) False xs
+
+(++) :: [a] -> [a] -> [a]
+(++) = foldr (\x h xs -> x : h  xs) id
+
+mapFoldr :: (a->b) ->[a] -> [b]
+mapFoldr f = foldr (\x xs -> f x : xs) []
+
+filterFoldr :: (a -> Bool) -> [a] -> [a]
+filterFoldr p = folder (\x xs -> if p x then x:xs else xs) []
+
+-- III)
+mejorSegun :: (a -> a -> Bool) -> [a] -> a
+mejorSegun criterio = foldr1 (\x mejorActual -> if criterio x mejorActual then x else mejorActual) 
+
+-- IV)
+Definir la función sumasParciales :: Num a => [a] -> [a], que dada una lista de números devuelve
+otra de la misma longitud, que tiene en cada posición la suma parcial de los elementos de la lista original
+desde la cabeza hasta la posición actual. Por ejemplo, sumasParciales [1,4,-1,0,5] ❀ [1,5,4,4,9].
+
+sumasParciales :: Num a => [a] -> [a]
+sumasParciales = reverse (foldl 0 (\x acc -> x + acc : ))
+
+sumasParciales xs = rec 0 xs
+         where 
+                  rec _ [] = []
+                  rec acc (x:xs) = acc + x : rec (acc+x) xs
+
+
+
+
 
