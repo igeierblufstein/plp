@@ -126,7 +126,7 @@ otra de la misma longitud, que tiene en cada posición la suma parcial de los el
 desde la cabeza hasta la posición actual. Por ejemplo, sumasParciales [1,4,-1,0,5] ❀ [1,5,4,4,9].
 
 sumasParciales :: Num a => [a] -> [a]
-sumasParciales = reverse (foldl 0 (\x acc -> x + acc : ))
+sumasParciales = reverse (foldl 0 (\acc x -> x + acc : ))
 
 sumasParciales xs = rec 0 xs
          where 
