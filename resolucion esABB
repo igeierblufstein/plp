@@ -1,0 +1,144 @@
+Vamos a armarlo con `foldAB`, paso a paso, explicando cada decisión.
+
+## 1. ¿Qué necesitamos saber en cada subárbol?
+
+Para verificar la propiedad de ABB en un nodo `Bin i r d`, no alcanza con saber si `i` y `d` son ABB — 
+también necesitamos el **máximo** de `i` (para compararlo con `r`) y el **mínimo** de `d` (para compararlo con `r`). 
+Entonces, en cada subárbol, la recursión tiene que ir arrastrando **tres cosas a la vez**:
+
+1. Si ese subárbol es un ABB válido (`Bool`).
+2. El mínimo del subárbol (`Maybe a`, porque puede estar vacío).
+3. El máximo del subárbol (`Maybe a`, por la misma razón).
+
+Como `foldAB` solo te deja acumular **un** valor de tipo `b`, 
+empaquetamos las tres cosas en una **tupla**: 
+`b = (Bool, Maybe a, Maybe a)`.
+
+## 2. El caso `Nil`
+
+¿Qué le corresponde a un árbol vacío?
+- ¿Es ABB? Sí, vacuamente (no tiene ningún elemento que viole nada). → `True`.
+- ¿Mínimo? No hay ninguno. → `Nothing`.
+- ¿Máximo? No hay ninguno. → `Nothing`.
+
+```haskell
+z = (True, Nothing, Nothing)
+```
+
+Este es el `z` que le vamos a pasar a `foldAB`.
+
+## 3. El caso `Bin` — la función combinadora
+
+`foldAB` nos va a dar, en cada nodo `Bin i r d`: el resultado de la recursión en `i` (llamémoslo `resI`), 
+la raíz `r`, y el resultado de la recursión en `d` (`resD`). 
+Cada uno de esos resultados ya es una tupla `(Bool, Maybe a, Maybe a)`. 
+Necesitamos "desarmarlos" con pattern matching:
+
+```haskell
+combinar (bi, minI, maxI) r (bd, minD, maxD) = ...
+```
+
+Ahora, pensemos qué tiene que devolver `combinar`:
+
+**¿Es ABB este nodo?** Tienen que cumplirse **cuatro** cosas a la vez:
+- El subárbol izquierdo es ABB (`bi`).
+- El subárbol derecho es ABB (`bd`).
+- La raíz `r` es mayor o igual que el máximo del subárbol izquierdo — pero cuidado, `maxI` es un `Maybe a`, 
+  puede no haber máximo si `i` era `Nil`. 
+- Si no hay máximo, esta condición se cumple automáticamente (no hay nada que la viole).
+- La raíz `r` es estrictamente menor que el mínimo del subárbol derecho, con el mismo cuidado sobre `minD`.
+
+Para expresar "si hay un valor, chequealo; si no, dejalo pasar", usamos la función `maybe`, que es exactamente para esto:
+
+```haskell
+maybe :: b -> (a -> b) -> Maybe a -> b
+```
+
+`maybe casoNothing casoJust m` — si `m` es `Nothing`, devuelve `casoNothing`; si es `Just x`, aplica la función `casoJust` a `x`.
+
+```haskell
+cumpleIzq = maybe True (\m -> m <= r) maxI
+cumpleDer = maybe True (\m -> r < m) minD
+```
+
+**¿Cuál es el mínimo de este nodo completo?** Es el mínimo entre "el mínimo del subárbol izquierdo" 
+(si existe) y `r` — pero como en un ABB el subárbol izquierdo, si existe, tiene *todos* sus valores `<= r`, 
+el mínimo de todo el nodo es simplemente el mínimo del subárbol izquierdo si lo hay, o si no, `r` mismo (porque no hay nada más chico):
+
+```haskell
+nuevoMin = maybe r id minI
+```
+
+(`maybe r id minI`: si `minI` es `Nothing`, el mínimo es `r`; si es `Just m`, el mínimo es `m` mismo, sin transformarlo — por eso `id`).
+
+**¿Cuál es el máximo de este nodo completo?** Análogo, con el subárbol derecho:
+
+```haskell
+nuevoMax = maybe r id maxD
+```
+
+Y finalmente:
+
+```haskell
+combinar (bi, minI, maxI) r (bd, minD, maxD) =
+    (bi && bd && cumpleIzq && cumpleDer, nuevoMin, nuevoMax)
+  where
+    cumpleIzq = maybe True (\m -> m <= r) maxI
+    cumpleDer = maybe True (\m -> r < m) minD
+    nuevoMin  = maybe r id minI
+    nuevoMax  = maybe r id maxD
+```
+
+## 4. Uniendo todo con `foldAB`
+
+```haskell
+esABB :: Ord a => AB a -> Bool
+esABB t = primero (foldAB (True, Nothing, Nothing) combinar t)
+  where
+    primero (b, _, _) = b
+    combinar (bi, minI, maxI) r (bd, minD, maxD) =
+        (bi && bd && cumpleIzq && cumpleDer, nuevoMin, nuevoMax)
+      where
+        cumpleIzq = maybe True (\m -> m <= r) maxI
+        cumpleDer = maybe True (\m -> r < m) minD
+        nuevoMin  = maybe r id minI
+        nuevoMax  = maybe r id maxD
+```
+
+`foldAB (True, Nothing, Nothing) combinar t` recorre todo el árbol y 
+devuelve la tupla final `(esABB?, mínimo, máximo)` de todo el árbol `t`. 
+Como a `esABB` solo le interesa el primer componente, usamos `primero` para 
+extraerlo (podrías también usar pattern matching directo con `let`, como en 
+           mi versión anterior).
+
+## 5. Traza con el ejemplo problemático
+
+Árbol: `Bin (Bin Nil 3 (Bin Nil 8 Nil)) 5 (Bin Nil 10 Nil)` — el caso que 
+viola la propiedad (`8` cuelga como hijo derecho de `3`, pero `8 > 5`).
+
+```
+foldAB en el subárbol (Bin Nil 8 Nil):
+  combinar (True,Nothing,Nothing) 8 (True,Nothing,Nothing)
+  cumpleIzq = True (maxI=Nothing), cumpleDer = True (minD=Nothing)
+  = (True, Just 8, Just 8)
+
+foldAB en (Bin Nil 3 (Bin Nil 8 Nil)):
+  resI = (True, Nothing, Nothing)   -- de Nil
+  r = 3
+  resD = (True, Just 8, Just 8)     -- calculado arriba
+  cumpleIzq = maybe True (<=3) Nothing = True
+  cumpleDer = maybe True (3<) (Just 8) = (3 < 8) = True
+  nuevoMin = maybe 3 id Nothing = 3
+  nuevoMax = maybe 3 id (Just 8) = 8
+  = (True, Just 3, Just 8)      -- hasta acá, este subárbol "parece" válido en sí mismo
+
+foldAB en el nodo raíz (Bin ... 5 ...):
+  resI = (True, Just 3, Just 8)     -- calculado arriba
+  r = 5
+  resD = (True, Just 10, Just 10)   -- análogo para el subárbol derecho
+  cumpleIzq = maybe True (<=5) (Just 8) = (8 <= 5) = False   -- ¡acá lo detecta!
+  = (True && True && False && ..., ...) = False
+```
+
+Justo por chequear el **máximo real** del subárbol izquierdo (`8`, no solo la raíz `3`), 
+detectamos correctamente que este árbol **no** es un ABB ✔️ — que era exactamente el caso que se nos escapaba antes.
