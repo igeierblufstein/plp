@@ -22,8 +22,8 @@ interseccion (Hash h1 t1) s2 = Hash h1 (\i -> filter(\x -> pertenece x s2) (t1 i
 
 foldr1 :: (a -> a -> a) -> [a] -> a 
 foldr1 f xs = case foldr paso Nothing xs of
-    Nothing -> error "lista vacía"
+    Nothing -> error "lista vacia"
     Just r -> r 
     where 
-        paso x [] = Just x
+        paso x Nothing = Just x
         paso x (Just recu) = Just (f x recu)
