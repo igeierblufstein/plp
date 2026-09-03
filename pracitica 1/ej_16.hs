@@ -1,3 +1,9 @@
+
+data Polinomio a = X
+| Cte a
+| Suma (Polinomio a) (Polinomio a)
+| Prod (Polinomio a) (Polinomio a)
+
 foldPolinomio :: Num a => b -> (a -> b) -> (b -> b -> b) -> (b -> b -> b) -> Polinomio a -> b
 foldPolinomio f1 f2 f3 f4 X = f1
 foldPolinomio f1 f2 f3 f4 (Cte a) = f2 a
